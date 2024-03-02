@@ -5,6 +5,8 @@ import {
 	GraphQLInt,
 } from 'graphql';
 import { UUIDType } from './uuid.js';
+import { MemberType } from './member-type.type.js';
+import { DB } from './db.type.js';
 
 export const ProfileType = new GraphQLObjectType({
 	name: 'Profile',
@@ -23,6 +25,15 @@ export const ProfileType = new GraphQLObjectType({
 		},
 		memberTypeId: {
 			type: new GraphQLNonNull(UUIDType),
+		},
+		memberType: {
+			type: MemberType,
+			args: {},
+			resolve: (
+				{ memberTypeId: id }: { memberTypeId: string },
+				_,
+				{ prisma }: { prisma: DB },
+			) => prisma.memberType.findUnique({	where: { id	}	}),
 		},
 	},
 });

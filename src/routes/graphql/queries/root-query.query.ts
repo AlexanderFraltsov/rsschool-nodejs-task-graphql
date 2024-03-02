@@ -5,6 +5,7 @@ import { UUIDType } from '../types/uuid.js';
 import { PostType } from '../types/post.type.js';
 import { ProfileType } from '../types/profile.type.js';
 import { MemberType } from '../types/member-type.type.js';
+import { MemberTypeId } from '../types/member-type-id.type.js';
 
 export const rootQuery = new GraphQLObjectType({
 	name: 'Query',
@@ -13,32 +14,64 @@ export const rootQuery = new GraphQLObjectType({
 			type: new GraphQLList(UserType),
 			resolve: (_, __, { prisma }: { prisma: DB }) => prisma.user.findMany(),
 		},
+		user: {
+			type: UserType,
+			args: {
+				id: {
+					type: new GraphQLNonNull(UUIDType),
+				},
+			},
+			resolve: async (_, { id } : { id: string }, { prisma }: { prisma: DB }) => {
+				const user = await prisma.user.findUnique({	where: { id	}	});
+				return user;
+			},
+		},
 		posts: {
 			type: new GraphQLList(PostType),
 			resolve: async (_, __, { prisma }: { prisma: DB }) => prisma.post.findMany(),
+		},
+		post: {
+			type: PostType,
+			args: {
+				id: {
+					type: new GraphQLNonNull(UUIDType),
+				},
+			},
+			resolve: async (_, { id } : { id: string }, { prisma }: { prisma: DB }) => {
+				const post = await prisma.post.findUnique({	where: { id	}	});
+				return post;
+			},
 		},
 		profiles: {
 			type: new GraphQLList(ProfileType),
 			resolve: async (_, __, { prisma }: { prisma: DB }) => prisma.profile.findMany(),
 		},
+		profile: {
+			type: ProfileType,
+			args: {
+				id: {
+					type: new GraphQLNonNull(UUIDType),
+				},
+			},
+			resolve: async (_, { id } : { id: string }, { prisma }: { prisma: DB }) => {
+				const profile = await prisma.profile.findUnique({	where: { id	}	});
+				return profile;
+			},
+		},
 		memberTypes: {
 			type: new GraphQLList(MemberType),
 			resolve: async (_, __, { prisma }: { prisma: DB }) => prisma.memberType.findMany(),
 		},
-		user: {
-			type: UserType,
+		memberType: {
+			type: MemberType,
 			args: {
-				userId: {
-					type: new GraphQLNonNull(UUIDType),
+				id: {
+					type: new GraphQLNonNull(MemberTypeId),
 				},
 			},
-			resolve: async (_, { userId } : { userId: string }, { prisma }: { prisma: DB }) => {
-					console.log('RESOLVER:', userId);
-					return await prisma.user.findUnique({
-					where: {
-						id: userId,
-					},
-				})
+			resolve: async (_, { id } : { id: string }, { prisma }: { prisma: DB }) => {
+				const memberType = await prisma.memberType.findUnique({	where: { id	}	});
+				return memberType;
 			},
 		},
 	},

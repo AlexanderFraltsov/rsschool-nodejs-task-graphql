@@ -1,22 +1,17 @@
 import {
-	GraphQLEnumType,
 	GraphQLFloat,
 	GraphQLInt,
 	GraphQLNonNull,
 	GraphQLObjectType,
 } from 'graphql';
 
+import { MemberTypeId } from './member-type-id.type.js';
+
 export const MemberType = new GraphQLObjectType({
 	name: 'MemberType',
 	fields: {
 		id: {
-			type: new GraphQLNonNull(new GraphQLEnumType({
-				name: 'MemberTypeId',
-				values: {
-					BASIC: { value: 'basic' },
-					BUSINESS: { value: 'business' },
-				}
-			})),
+			type: new GraphQLNonNull(MemberTypeId),
 		},
 		discount: {
 			type: new GraphQLNonNull(GraphQLFloat),
