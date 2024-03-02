@@ -3,9 +3,15 @@ import {
 	GraphQLObjectType,
 	GraphQLString,
 } from 'graphql';
+import { DB } from './db.type.js';
 import { UUIDType } from './uuid.js';
 
-export const PostType = new GraphQLObjectType({
+export const PostType: GraphQLObjectType<{
+	id: string,
+	title: string,
+	content: string,
+	authorId: string,
+}, { prisma: DB }> = new GraphQLObjectType({
 	name: 'Post',
 	fields: {
 		id: {

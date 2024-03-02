@@ -1,17 +1,20 @@
 import {
 	GraphQLFloat,
-	GraphQLInterfaceType,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLString,
 } from 'graphql';
-import { UUIDType } from './uuid.js';
-import { ProfileType } from './profile.type.js';
 import { DB } from './db.type.js';
+import { UUIDType } from './uuid.js';
 import { PostType } from './post.type.js';
+import { ProfileType } from './profile.type.js';
 
-export const UserType = new GraphQLObjectType({
+export const UserType: GraphQLObjectType<{
+	id: string,
+	name: string,
+	balance: string,
+}, { prisma: DB }> = new GraphQLObjectType({
 	name: 'User',
 	fields: () => ({
 		id: {
@@ -26,25 +29,25 @@ export const UserType = new GraphQLObjectType({
 		profile: {
 			type: ProfileType,
 			resolve: (
-				{ id: userId }: { id: string },
+				{ id: userId },
 				_,
-				{ prisma }: { prisma: DB },
+				{ prisma },
 			) => prisma.profile.findUnique({	where: { userId	}	}),
 		},
 		posts: {
 			type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
 			resolve: (
-				{ id: authorId }: { id: string },
+				{ id: authorId },
 				_,
-				{ prisma }: { prisma: DB },
+				{ prisma },
 			) => prisma.post.findMany({ where: { authorId } }),
 		},
 		userSubscribedTo: {
 			type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
 			resolve: (
-				{ id: subscriberId }: { id: string },
+				{ id: subscriberId },
 				_,
-				{ prisma }: { prisma: DB },
+				{ prisma },
 			) => prisma.user.findMany({
         where: {
           subscribedToUser: {
@@ -58,9 +61,9 @@ export const UserType = new GraphQLObjectType({
 		subscribedToUser: {
 			type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
 			resolve: (
-				{ id: authorId }: { id: string },
+				{ id: authorId },
 				_,
-				{ prisma }: { prisma: DB },
+				{ prisma },
 			) => prisma.user.findMany({
         where: {
           userSubscribedTo: {

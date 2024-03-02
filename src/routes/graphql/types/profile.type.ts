@@ -8,7 +8,13 @@ import { UUIDType } from './uuid.js';
 import { MemberType } from './member-type.type.js';
 import { DB } from './db.type.js';
 
-export const ProfileType = new GraphQLObjectType({
+export const ProfileType: GraphQLObjectType<{
+	id: string,
+	isMale: boolean,
+	yearOfBirth: number,
+	userId: string,
+	memberTypeId: string,
+}, { prisma: DB }> = new GraphQLObjectType({
 	name: 'Profile',
 	fields: {
 		id: {
@@ -30,9 +36,9 @@ export const ProfileType = new GraphQLObjectType({
 			type: MemberType,
 			args: {},
 			resolve: (
-				{ memberTypeId: id }: { memberTypeId: string },
+				{ memberTypeId: id },
 				_,
-				{ prisma }: { prisma: DB },
+				{ prisma },
 			) => prisma.memberType.findUnique({	where: { id	}	}),
 		},
 	},
