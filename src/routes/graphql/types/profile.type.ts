@@ -7,6 +7,7 @@ import {
 import { UUIDType } from './uuid.js';
 import { MemberType } from './member-type.type.js';
 import { DB } from './db.type.js';
+import { MemberTypeId } from './member-type-id.type.js';
 
 export const ProfileType: GraphQLObjectType<{
 	id: string,
@@ -30,7 +31,7 @@ export const ProfileType: GraphQLObjectType<{
 			type: new GraphQLNonNull(UUIDType),
 		},
 		memberTypeId: {
-			type: new GraphQLNonNull(UUIDType),
+			type: new GraphQLNonNull(MemberTypeId),
 		},
 		memberType: {
 			type: MemberType,
