@@ -22,7 +22,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 				variables: variableValues,
 			} = req.body;
 
-			validate(createGQLRequestSchema, parse(new Source(source)), [depthLimit(5)]);
+			const errors = validate(createGQLRequestSchema, parse(new Source(source)), [depthLimit(5)]);
+
+			if (errors.length > 0) {
+				return { errors };
+			}
+
 			return await graphql({
 				schema: createGQLRequestSchema,
 				source,
