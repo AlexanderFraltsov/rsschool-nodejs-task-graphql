@@ -4,10 +4,12 @@ import {
 	GraphQLBoolean,
 	GraphQLInt,
 } from 'graphql';
+
 import { UUIDType } from './uuid.js';
 import { MemberType } from './member-type.type.js';
-import { DB } from './db.type.js';
+import { GQLContext } from './context.type.js';
 import { MemberTypeId } from './member-type-id.type.js';
+import { getDataLoader } from '../utils/get-data-loader.util.js';
 
 export const ProfileType: GraphQLObjectType<{
 	id: string,
@@ -15,7 +17,7 @@ export const ProfileType: GraphQLObjectType<{
 	yearOfBirth: number,
 	userId: string,
 	memberTypeId: string,
-}, { prisma: DB }> = new GraphQLObjectType({
+}, GQLContext> = new GraphQLObjectType({
 	name: 'Profile',
 	fields: {
 		id: {
@@ -36,11 +38,25 @@ export const ProfileType: GraphQLObjectType<{
 		memberType: {
 			type: MemberType,
 			args: {},
-			resolve: (
+			resolve: async (
 				{ memberTypeId: id },
 				_,
-				{ prisma },
-			) => prisma.memberType.findUnique({	where: { id	}	}),
+				{ prisma, dataLoaders },
+				info,
+			) => {
+				const findMany = async (ids: string[]) => {
+					const rows = await prisma.memberType.findMany({ where: { id: { in: ids } } });
+					const sortedInIdsOrder = ids.map((id: string) => rows.find(x => x.id === id));
+					return sortedInIdsOrder;
+				}
+				const dl = await getDataLoader<({
+					id: string;
+					discount: number;
+					postsLimitPerMonth: number;
+				} | undefined)>(dataLoaders, info.fieldNodes, findMany);
+
+				return dl.load(id);
+			},
 		},
 	},
 });

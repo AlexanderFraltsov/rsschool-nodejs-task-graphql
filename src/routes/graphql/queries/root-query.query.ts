@@ -1,18 +1,21 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import { DB } from '../types/db.type.js';
+import DataLoader, { BatchLoadFn } from 'dataloader';
+
 import { UserType } from '../types/user.type.js';
 import { UUIDType } from '../types/uuid.js';
 import { PostType } from '../types/post.type.js';
 import { MemberType } from '../types/member-type.type.js';
+import { GQLContext } from '../types/context.type.js';
 import { ProfileType } from '../types/profile.type.js';
 import { MemberTypeId } from '../types/member-type-id.type.js';
+import { getDataLoader } from '../utils/get-data-loader.util.js';
 
-export const rootQuery = new GraphQLObjectType({
+export const rootQuery: GraphQLObjectType<unknown, GQLContext> = new GraphQLObjectType({
 	name: 'Query',
-	fields: {
+	fields: () => ({
 		users: {
 			type: new GraphQLList(UserType),
-			resolve: (_, __, { prisma }: { prisma: DB }) => prisma.user.findMany(),
+			resolve: (_, __, { prisma }) => prisma.user.findMany(),
 		},
 		user: {
 			type: UserType,
@@ -21,9 +24,19 @@ export const rootQuery = new GraphQLObjectType({
 					type: new GraphQLNonNull(UUIDType),
 				},
 			},
-			resolve: async (_, { id } : { id: string }, { prisma }) => {
-				const user = await prisma.user.findUnique({	where: { id	}	});
-				return user;
+			resolve: async (_, { id } : { id: string },	{ prisma, dataLoaders }, info) => {
+				const findMany = async (ids: string[]) => {
+					const rows = await prisma.user.findMany({ where: { id: { in: ids } } });
+					const sortedInIdsOrder = ids.map((id: string) => rows.find(x => x.id === id));
+					return sortedInIdsOrder;
+				}
+				const dl = await getDataLoader<({
+					id: string;
+					name: string;
+					balance: number;
+				} | undefined)>(dataLoaders, info.fieldNodes, findMany);
+
+				return dl.load(id);
 			},
 		},
 		posts: {
@@ -37,9 +50,20 @@ export const rootQuery = new GraphQLObjectType({
 					type: new GraphQLNonNull(UUIDType),
 				},
 			},
-			resolve: async (_, { id } : { id: string }, { prisma }) => {
-				const post = await prisma.post.findUnique({	where: { id	}	});
-				return post;
+			resolve: async (_, { id } : { id: string }, { prisma, dataLoaders }, info) => {
+				const findMany = async (ids: string[]) => {
+					const rows = await prisma.post.findMany({ where: { id: { in: ids } } });
+					const sortedInIdsOrder = ids.map((id: string) => rows.find(x => x.id === id));
+					return sortedInIdsOrder;
+				}
+				const dl = await getDataLoader<({
+					id: string;
+					title: string;
+					content: string;
+					authorId: string;
+				} | undefined)>(dataLoaders, info.fieldNodes, findMany);
+
+				return dl.load(id);
 			},
 		},
 		profiles: {
@@ -53,9 +77,21 @@ export const rootQuery = new GraphQLObjectType({
 					type: new GraphQLNonNull(UUIDType),
 				},
 			},
-			resolve: async (_, { id } : { id: string }, { prisma }) => {
-				const profile = await prisma.profile.findUnique({	where: { id	}	});
-				return profile;
+			resolve: async (_, { id } : { id: string }, { prisma, dataLoaders }, info) => {
+				const findMany = async (ids: string[]) => {
+					const rows = await prisma.profile.findMany({ where: { id: { in: ids } } });
+					const sortedInIdsOrder = ids.map((id: string) => rows.find(x => x.id === id));
+					return sortedInIdsOrder;
+				}
+				const dl = await getDataLoader<({
+					id: string;
+					isMale: boolean;
+					yearOfBirth: number;
+					userId: string;
+					memberTypeId: string;
+				} | undefined)>(dataLoaders, info.fieldNodes, findMany);
+
+				return dl.load(id);
 			},
 		},
 		memberTypes: {
@@ -69,10 +105,20 @@ export const rootQuery = new GraphQLObjectType({
 					type: new GraphQLNonNull(MemberTypeId),
 				},
 			},
-			resolve: async (_, { id } : { id: string }, { prisma }) => {
-				const memberType = await prisma.memberType.findUnique({	where: { id	}	});
-				return memberType;
+			resolve: async (_, { id } : { id: string }, { prisma, dataLoaders }, info) => {
+				const findMany = async (ids: string[]) => {
+					const rows = await prisma.memberType.findMany({ where: { id: { in: ids } } });
+					const sortedInIdsOrder = ids.map((id: string) => rows.find(x => x.id === id));
+					return sortedInIdsOrder;
+				}
+				const dl = await getDataLoader<({
+					id: string;
+					discount: number;
+					postsLimitPerMonth: number;
+				} | undefined)>(dataLoaders, info.fieldNodes, findMany);
+
+				return dl.load(id);
 			},
 		},
-	},
+	}),
 });
