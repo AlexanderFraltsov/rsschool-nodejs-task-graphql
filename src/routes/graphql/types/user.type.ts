@@ -131,25 +131,7 @@ export const UserType: GraphQLObjectType<{
 					const sortedInIdsOrder = ids.map((id: string) => rows.filter(x => x.userSubscribedTo.some(({authorId}) => authorId === id)));
 					return sortedInIdsOrder;
 				}
-				// const findMany = async (ids: string[]) => {
-				// 	const sortedInIdsOrder: {
-				// 		id: string;
-				// 		name: string;
-				// 		balance: number;
-				// 	}[][] = [];
 
-				// 	for (const id of ids) {
-				// 		const rows = await prisma.user.findMany({ where: {
-				// 			userSubscribedTo: {
-				// 				some: {
-				// 					authorId: id,
-				// 				},
-				// 			},
-				// 		} });
-				// 		sortedInIdsOrder.push(rows);
-				// 	}
-				// 	return sortedInIdsOrder;
-				// }
 				const dl = await getDataLoader<({
 					id: string;
 					name: string;

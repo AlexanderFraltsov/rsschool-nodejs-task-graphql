@@ -1,5 +1,4 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import DataLoader, { BatchLoadFn } from 'dataloader';
 
 import { UserType } from '../types/user.type.js';
 import { UUIDType } from '../types/uuid.js';
@@ -10,12 +9,14 @@ import { ProfileType } from '../types/profile.type.js';
 import { MemberTypeId } from '../types/member-type-id.type.js';
 import { getDataLoader } from '../utils/get-data-loader.util.js';
 
-export const rootQuery: GraphQLObjectType<unknown, GQLContext> = new GraphQLObjectType({
+export const rootQuery: GraphQLObjectType<null, GQLContext> = new GraphQLObjectType({
 	name: 'Query',
 	fields: () => ({
 		users: {
 			type: new GraphQLList(UserType),
-			resolve: (_, __, { prisma }) => prisma.user.findMany(),
+			resolve: async (_, __, { prisma }) => {
+				return await prisma.user.findMany();
+			},
 		},
 		user: {
 			type: UserType,
